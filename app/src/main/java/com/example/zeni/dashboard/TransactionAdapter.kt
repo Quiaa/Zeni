@@ -34,7 +34,7 @@ class TransactionAdapter : ListAdapter<Transaction, TransactionAdapter.Transacti
             binding.textViewTransactionCategory.text = transaction.category
 
             // Format the amount as currency
-            val format: NumberFormat = NumberFormat.getCurrencyInstance(Locale("tr", "TR"))
+            val format: NumberFormat = NumberFormat.getCurrencyInstance(Locale("en", "US"))
             val formattedAmount = format.format(transaction.amount)
 
             // Set the amount and color based on the transaction type

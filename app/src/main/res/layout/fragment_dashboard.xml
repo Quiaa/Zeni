@@ -71,7 +71,7 @@
                     android:textColor="?attr/colorPrimary"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/textViewBalanceLabel"
-                    tools:text="₺5,000.00" />
+                    tools:text="$5,000.00" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
         </com.google.android.material.card.MaterialCardView>
