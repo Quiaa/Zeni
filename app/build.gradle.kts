@@ -1,6 +1,10 @@
+// This file is located at app/build.gradle.kts
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    // Apply the Google Services plugin here
+    alias(libs.plugins.google.services)
 }
 
 android {
@@ -27,11 +31,15 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_1_8 // Changed to 1.8 for compatibility
+        targetCompatibility = JavaVersion.VERSION_1_8 // Changed to 1.8 for compatibility
     }
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "1.8" // Changed to 1.8 for compatibility
+    }
+    // Enable ViewBinding
+    buildFeatures {
+        viewBinding = true
     }
 }
 
@@ -42,6 +50,20 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
+
+    // Add the new dependencies here
+    // Navigation
+    implementation(libs.androidx.navigation.fragment.ktx)
+    implementation(libs.androidx.navigation.ui.ktx)
+    // Lifecycle (ViewModel)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    // Firebase - Import the Bill of Materials
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.analytics)
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.firestore)
+
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
