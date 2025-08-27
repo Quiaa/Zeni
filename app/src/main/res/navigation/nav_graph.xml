@@ -60,6 +60,9 @@
         <action
             android:id="@+id/action_dashboardFragment_to_addTransactionFragment"
             app:destination="@id/addTransactionFragment" />
+        <action
+            android:id="@+id/action_dashboardFragment_to_allTransactionsFragment"
+            app:destination="@id/allTransactionsFragment" />
     </fragment>
     <fragment
         android:id="@+id/savingsFragment"
@@ -95,5 +98,10 @@
         android:name="com.example.zeni.reminders.AddReminderFragment"
         android:label="fragment_add_reminder"
         tools:layout="@layout/fragment_add_reminder" />
+    <fragment
+        android:id="@+id/allTransactionsFragment"
+        android:name="com.example.zeni.transactions.AllTransactionsFragment"
+        android:label="fragment_all_transactions"
+        tools:layout="@layout/fragment_all_transactions" />
 
 </navigation>
