@@ -43,6 +43,6 @@ class SplashFragment : Fragment() {
                 // No user is signed in, navigate to Login
                 findNavController().navigate(R.id.action_splashFragment_to_loginFragment)
             }
-        }, 2000) // 2 second delay
+        }, 1000) // 2 second delay
     }
 }

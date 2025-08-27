@@ -1,27 +1,40 @@
 package com.example.zeni.dashboard
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.*
+import com.example.zeni.core.data.model.Transaction
 import com.example.zeni.core.data.repository.AuthRepository
+import com.example.zeni.core.data.repository.TransactionRepository
 import com.google.firebase.auth.FirebaseUser
 
 class DashboardViewModel : ViewModel() {
 
-    // Create an instance of the repository
-    private val repository = AuthRepository()
+    private val authRepo = AuthRepository()
+    private val transactionRepo = TransactionRepository()
 
-    // LiveData to hold the current user's information
     private val _user = MutableLiveData<FirebaseUser?>()
     val user: LiveData<FirebaseUser?> = _user
 
-    init {
-        // When the ViewModel is created, get the current user
-        _user.value = repository.getCurrentUser()
+    val transactions: LiveData<List<Transaction>> = transactionRepo.getTransactions().asLiveData()
+
+    // LiveData to hold the calculated monthly balance
+    val balance: LiveData<Double> = transactions.map { transactionList ->
+        var totalIncome = 0.0
+        var totalExpense = 0.0
+        for (transaction in transactionList) {
+            if (transaction.type == "income") {
+                totalIncome += transaction.amount
+            } else {
+                totalExpense += transaction.amount
+            }
+        }
+        totalIncome - totalExpense
     }
 
-    // Function to handle user sign out
+    init {
+        _user.value = authRepo.getCurrentUser()
+    }
+
     fun signOut() {
-        repository.signOut()
+        authRepo.signOut()
     }
 }

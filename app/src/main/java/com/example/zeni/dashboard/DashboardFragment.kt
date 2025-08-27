@@ -1,4 +1,3 @@
-// File: app/src/main/java/com/example/zeni/dashboard/DashboardFragment.kt
 package com.example.zeni.dashboard
 
 import android.os.Bundle
@@ -8,16 +7,19 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.zeni.R
 import com.example.zeni.databinding.FragmentDashboardBinding
+import java.text.NumberFormat
+import java.util.Locale
 
 class DashboardFragment : Fragment() {
 
     private var _binding: FragmentDashboardBinding? = null
     private val binding get() = _binding!!
 
-    // Get a reference to the DashboardViewModel
     private val viewModel: DashboardViewModel by viewModels()
+    private lateinit var transactionAdapter: TransactionAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -30,33 +32,49 @@ class DashboardFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        setupObservers() // Start observing LiveData
+        setupRecyclerView()
+        setupObservers()
 
-        // Set OnClickListener for the sign out button
         binding.buttonSignOut.setOnClickListener {
             viewModel.signOut()
-            // After signing out, navigate back to the splash screen.
-            // Splash screen will then redirect to the login screen.
             findNavController().navigate(R.id.splashFragment)
         }
 
-        // TODO: Setup RecyclerView and FAB click listener
-    }
-
-    private fun setupObservers() {
-        // Observe the user LiveData
-        viewModel.user.observe(viewLifecycleOwner) { firebaseUser ->
-            if (firebaseUser != null) {
-                // If user is not null, update the UI with their email
-                binding.textViewUserEmail.text = firebaseUser.email
-            } else {
-                // If user is null (which happens after sign out), navigate away
-                // This is a safeguard, the primary navigation is in the sign out button click
-                findNavController().navigate(R.id.splashFragment)
-            }
+        binding.fabAddTransaction.setOnClickListener {
+            findNavController().navigate(R.id.action_dashboardFragment_to_addTransactionFragment)
         }
     }
 
+    private fun setupRecyclerView() {
+        transactionAdapter = TransactionAdapter()
+        binding.recyclerViewTransactions.apply {
+            adapter = transactionAdapter
+            layoutManager = LinearLayoutManager(requireContext())
+        }
+    }
+
+    private fun setupObservers() {
+        viewModel.user.observe(viewLifecycleOwner) { firebaseUser ->
+            if (firebaseUser != null) {
+                binding.textViewUserEmail.text = firebaseUser.email
+            } else {
+                findNavController().navigate(R.id.splashFragment)
+            }
+        }
+
+        // Observe the list of transactions
+        viewModel.transactions.observe(viewLifecycleOwner) { transactions ->
+            // Submit the new list to the adapter.
+            // ListAdapter will efficiently calculate and apply the changes.
+            transactionAdapter.submitList(transactions)
+        }
+
+        // Observe the calculated balance
+        viewModel.balance.observe(viewLifecycleOwner) { balance ->
+            val format: NumberFormat = NumberFormat.getCurrencyInstance(Locale("tr", "TR"))
+            binding.textViewBalanceValue.text = format.format(balance)
+        }
+    }
 
     override fun onDestroyView() {
         super.onDestroyView()
