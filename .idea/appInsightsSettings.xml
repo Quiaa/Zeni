@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.example.zeni" />
+                  <option name="mobileSdkAppId" value="1:772647731429:android:41c8da382652d1cd65140c" />
+                  <option name="projectId" value="zeni-finance-app" />
+                  <option name="projectNumber" value="772647731429" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />
