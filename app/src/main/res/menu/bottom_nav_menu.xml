@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/dashboardFragment"
+        android:icon="@drawable/ic_dashboard"
+        android:title="Dashboard" />
+
+    <item
+        android:id="@+id/savingsFragment"
+        android:icon="@drawable/ic_savings"
+        android:title="Savings" />
+
+    <item
+        android:id="@+id/remindersFragment"
+        android:icon="@drawable/ic_reminders"
+        android:title="Reminders" />
+</menu>

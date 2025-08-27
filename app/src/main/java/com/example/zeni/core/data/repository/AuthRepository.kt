@@ -1,33 +1,31 @@
 package com.example.zeni.core.data.repository
 
-import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 
 class AuthRepository {
 
-    // Get the FirebaseAuth instance
     private val auth: FirebaseAuth = Firebase.auth
 
-    // Function to get the current user
-    fun getCurrentUser() = auth.currentUser
+    fun getCurrentUser(): FirebaseUser? = auth.currentUser
 
-    // Suspend function to sign in a user.
-    // It will return an AuthResult or throw an exception.
-    suspend fun signIn(email: String, pass: String): AuthResult {
-        return auth.signInWithEmailAndPassword(email, pass).await()
+    // Function to get the current user's state as a Flow
+    fun getAuthState() = callbackFlow {
+        val authStateListener = FirebaseAuth.AuthStateListener { firebaseAuth ->
+            trySend(firebaseAuth.currentUser)
+        }
+        auth.addAuthStateListener(authStateListener)
+        awaitClose { auth.removeAuthStateListener(authStateListener) }
     }
 
-    // Suspend function to create a new user.
-    // It will return an AuthResult or throw an exception.
-    suspend fun signUp(email: String, pass: String): AuthResult {
-        return auth.createUserWithEmailAndPassword(email, pass).await()
-    }
 
-    // Function to sign out the current user
-    fun signOut() {
-        auth.signOut()
-    }
+    suspend fun signIn(email: String, pass: String) = auth.signInWithEmailAndPassword(email, pass).await()
+    suspend fun signUp(email: String, pass: String) = auth.createUserWithEmailAndPassword(email, pass).await()
+    fun signOut() = auth.signOut()
 }

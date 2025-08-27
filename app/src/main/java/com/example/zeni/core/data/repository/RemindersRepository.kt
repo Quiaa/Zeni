@@ -1,7 +1,6 @@
-// File: app/src/main/java/com/example/zeni/core/data/repository/TransactionRepository.kt
 package com.example.zeni.core.data.repository
 
-import com.example.zeni.core.data.model.Transaction
+import com.example.zeni.core.data.model.Reminder
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.firestore.ktx.toObjects
@@ -13,21 +12,24 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
 
-class TransactionRepository {
+class RemindersRepository {
 
-    private val transactionCollection = Firebase.firestore.collection("transactions")
+    private val remindersCollection = Firebase.firestore.collection("reminders")
     private val authRepo = AuthRepository()
 
-    suspend fun addTransaction(transaction: Transaction) {
-        transactionCollection.add(transaction).await()
+    // Function to add a new reminder
+    suspend fun addReminder(reminder: Reminder) {
+        remindersCollection.add(reminder).await()
     }
 
+    // Function to get a real-time flow of reminders for the current user
     @OptIn(ExperimentalCoroutinesApi::class)
-    fun getTransactions(): Flow<List<Transaction>> {
+    fun getReminders(): Flow<List<Reminder>> {
         return authRepo.getAuthState().flatMapLatest { user ->
-            val query = transactionCollection
+            val query = remindersCollection
                 .whereEqualTo("userId", user?.uid ?: "")
-                .orderBy("timestamp", Query.Direction.DESCENDING)
+                // Order by the upcoming reminder date
+                .orderBy("reminderDate", Query.Direction.ASCENDING)
 
             query.snapshots().map { snapshot ->
                 snapshot.toObjects()

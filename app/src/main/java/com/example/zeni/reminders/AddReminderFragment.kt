@@ -1,0 +1,104 @@
+// File: app/src/main/java/com/example/zeni/reminders/AddReminderFragment.kt
+package com.example.zeni.reminders
+
+import android.app.DatePickerDialog
+import android.os.Bundle
+import androidx.fragment.app.Fragment
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.Toast
+import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
+import com.example.zeni.databinding.FragmentAddReminderBinding
+import com.example.zeni.transactions.SaveState
+import java.text.SimpleDateFormat
+import java.util.*
+
+class AddReminderFragment : Fragment() {
+
+    private var _binding: FragmentAddReminderBinding? = null
+    private val binding get() = _binding!!
+
+    private val viewModel: AddReminderViewModel by viewModels()
+    private val calendar = Calendar.getInstance()
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentAddReminderBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        setupClickListeners()
+        observeSaveState()
+        updateDateButtonText() // Set initial date text
+    }
+
+    private fun setupClickListeners() {
+        binding.buttonSelectDate.setOnClickListener {
+            showDatePickerDialog()
+        }
+
+        binding.buttonSaveReminder.setOnClickListener {
+            val title = binding.editTextReminderTitle.text.toString().trim()
+            val amountStr = binding.editTextAmount.text.toString().trim()
+            val amount = amountStr.toDoubleOrNull()
+
+            if (title.isEmpty() || amount == null || amount <= 0) {
+                Toast.makeText(context, "Please fill all fields with valid data.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            viewModel.saveNewReminder(title, amount, calendar.time)
+        }
+    }
+
+    private fun observeSaveState() {
+        viewModel.saveState.observe(viewLifecycleOwner) { state ->
+            when (state) {
+                SaveState.SAVING -> binding.buttonSaveReminder.isEnabled = false
+                SaveState.SUCCESS -> {
+                    Toast.makeText(context, "Reminder saved!", Toast.LENGTH_SHORT).show()
+                    findNavController().popBackStack()
+                }
+                SaveState.FAILED -> {
+                    Toast.makeText(context, "Error: Could not save reminder.", Toast.LENGTH_SHORT).show()
+                    binding.buttonSaveReminder.isEnabled = true
+                }
+                else -> binding.buttonSaveReminder.isEnabled = true
+            }
+        }
+    }
+
+    private fun showDatePickerDialog() {
+        val dateSetListener = DatePickerDialog.OnDateSetListener { _, year, month, dayOfMonth ->
+            calendar.set(Calendar.YEAR, year)
+            calendar.set(Calendar.MONTH, month)
+            calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
+            updateDateButtonText()
+        }
+
+        DatePickerDialog(
+            requireContext(),
+            dateSetListener,
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH)
+        ).show()
+    }
+
+    private fun updateDateButtonText() {
+        val dateFormat = SimpleDateFormat("MMM d, yyyy", Locale.US)
+        binding.buttonSelectDate.text = dateFormat.format(calendar.time)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+}

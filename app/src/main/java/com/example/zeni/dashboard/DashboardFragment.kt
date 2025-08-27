@@ -71,7 +71,7 @@ class DashboardFragment : Fragment() {
 
         // Observe the calculated balance
         viewModel.balance.observe(viewLifecycleOwner) { balance ->
-            val format: NumberFormat = NumberFormat.getCurrencyInstance(Locale("en", "US"))
+            val format: NumberFormat = NumberFormat.getCurrencyInstance(Locale.US)
             binding.textViewBalanceValue.text = format.format(balance)
         }
     }
