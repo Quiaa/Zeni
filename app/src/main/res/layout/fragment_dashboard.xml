@@ -163,9 +163,22 @@
                         android:id="@+id/recyclerViewPieLegend"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        tools:itemCount="5"
+                        android:layout_marginTop="12dp"
+                        tools:itemCount="4"
                         tools:listitem="@layout/item_pie_legend" />
+
+                    <TextView
+                        android:id="@+id/textViewToggleLegend"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:layout_marginTop="8dp"
+                        android:padding="8dp"
+                        android:text="@string/view_all"
+                        android:textAppearance="?attr/textAppearanceButton"
+                        android:textColor="?attr/colorPrimary"
+                        android:visibility="gone"
+                        tools:visibility="visible" />
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>

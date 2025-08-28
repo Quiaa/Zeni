@@ -60,6 +60,13 @@ class DashboardFragment : Fragment() {
         binding.buttonViewAll.setOnClickListener {
             findNavController().navigate(R.id.action_dashboardFragment_to_allTransactionsFragment)
         }
+
+        binding.textViewToggleLegend.setOnClickListener {
+            if (::pieLegendAdapter.isInitialized) {
+                pieLegendAdapter.toggleExpansion()
+                updateLegendToggleButton()
+            }
+        }
     }
 
     private fun setupRecyclerViews() {
@@ -80,7 +87,10 @@ class DashboardFragment : Fragment() {
             setHoleColor(Color.TRANSPARENT)
             setDrawEntryLabels(false)
             legend.isEnabled = false
-            setUsePercentValues(true) // Crucial for PercentFormatter
+
+            setHoleRadius(72f) // Make the hole slightly smaller, so the ring is thicker (e.g., 58f for hole, 42f for ring)
+            setTransparentCircleRadius(61f) // Slightly larger than hole, for visual effect
+            setExtraOffsets(5f, 15f, 5f, 15f)
 
             // Add the click listener
             setOnChartValueSelectedListener(object : OnChartValueSelectedListener {
@@ -148,36 +158,56 @@ class DashboardFragment : Fragment() {
         binding.pieChart.centerText = "Total Expense\n${currencyFormat.format(totalExpense)}"
         binding.pieChart.setCenterTextSize(18f)
 
-        if (entries.isEmpty()) {
+        if (entries.isEmpty() || totalExpense == 0.0) {
             binding.cardViewPieChart.visibility = View.GONE
             return
         }
         binding.cardViewPieChart.visibility = View.VISIBLE
 
         val dataSet = PieDataSet(entries, "Expenses")
+        dataSet.sliceSpace = 1f // Add space between slices
         dataSet.colors = ColorTemplate.MATERIAL_COLORS.toList()
 
-        // --- NEW STYLING FOR PERCENTAGES ---
         dataSet.setDrawValues(true) // We want to draw values (percentages)
-        dataSet.valueFormatter = PercentFormatter(binding.pieChart) // Format values as percentages
+        dataSet.valueFormatter = ConditionalPercentFormatter(binding.pieChart)
         dataSet.valueTextSize = 12f
         dataSet.valueTextColor = ContextCompat.getColor(requireContext(), R.color.text_primary)
 
         // Configure lines pointing to the percentage values
         dataSet.valueLinePart1OffsetPercentage = 100f
-        dataSet.valueLinePart1Length = 0.5f
-        dataSet.valueLinePart2Length = 0.2f
-        dataSet.valueLineColor = ContextCompat.getColor(requireContext(), R.color.text_secondary)
+        dataSet.valueLinePart1Length = 0.4f
+        dataSet.valueLinePart2Length = -0.2f
         dataSet.yValuePosition = PieDataSet.ValuePosition.OUTSIDE_SLICE
+
+        dataSet.valueLineColor = Color.TRANSPARENT
+
 
         val pieData = PieData(dataSet)
         binding.pieChart.data = pieData
         binding.pieChart.invalidate() // Refresh chart
 
         // Update custom legend
-        val legendData = dataSet.colors.zip(entries)
+        val legendData = entries.mapIndexed { index, entry ->
+            val color = dataSet.getColor(index)
+            Pair(color, entry)
+        }
         pieLegendAdapter = PieLegendAdapter(legendData, totalExpense.toFloat())
         binding.recyclerViewPieLegend.adapter = pieLegendAdapter
+
+        updateLegendToggleButton()
+    }
+
+    private fun updateLegendToggleButton() {
+        if (::pieLegendAdapter.isInitialized && pieLegendAdapter.getOriginalItemCount() > 5) {
+            binding.textViewToggleLegend.visibility = View.VISIBLE
+            if (pieLegendAdapter.isExpanded()) {
+                binding.textViewToggleLegend.text = getString(R.string.show_less)
+            } else {
+                binding.textViewToggleLegend.text = getString(R.string.view_all)
+            }
+        } else {
+            binding.textViewToggleLegend.visibility = View.GONE
+        }
     }
 
 
