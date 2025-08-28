@@ -42,18 +42,32 @@ class DashboardViewModel : ViewModel() {
         }
     }
 
-    val expenseByCategory: LiveData<List<PieEntry>> = transactions.map { transactionList ->
-        transactionList
-            .filter { it.type == "expense" } // Only consider expenses
-            .groupBy { it.category } // Group by category
+    // Now it will hold a Pair of the pie entries and the total expense for the center text
+    val pieChartData: LiveData<Pair<List<PieEntry>, Double>> = transactions.map { transactionList ->
+        val expenses = transactionList.filter { it.type == "expense" }
+        val totalExpense = expenses.sumOf { it.amount }
+
+        val entries = expenses
+            .groupBy { it.category }
             .map { (category, transactions) ->
-                // For each category, create a PieEntry with the category name and total amount
                 PieEntry(transactions.sumOf { it.amount }.toFloat(), category)
             }
+
+        // Return both the entries and the total expense
+        Pair(entries, totalExpense)
     }
+    // LiveData to hold the currently selected pie chart slice.
+    // Null means nothing is selected.
+    private val _selectedSlice = MutableLiveData<PieEntry?>(null)
+    val selectedSlice: LiveData<PieEntry?> = _selectedSlice
 
     init {
         _user.value = authRepo.getCurrentUser()
+    }
+
+    // Called from the Fragment when a user selects or deselects a slice.
+    fun onSliceSelected(entry: PieEntry?) {
+        _selectedSlice.value = entry
     }
 
     fun signOut() {

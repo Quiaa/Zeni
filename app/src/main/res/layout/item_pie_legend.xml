@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingVertical="4dp">
+
+    <View
+        android:id="@+id/viewColor"
+        android:layout_width="16dp"
+        android:layout_height="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:background="@color/primary" />
+
+    <TextView
+        android:id="@+id/textViewPercentage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@+id/viewColor"
+        app:layout_constraintStart_toEndOf="@+id/viewColor"
+        app:layout_constraintTop_toTopOf="@+id/viewColor"
+        tools:text="%29" />
+
+    <TextView
+        android:id="@+id/textViewCategoryName"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        app:layout_constraintBottom_toBottomOf="@+id/textViewPercentage"
+        app:layout_constraintStart_toEndOf="@+id/textViewPercentage"
+        app:layout_constraintTop_toTopOf="@+id/textViewPercentage"
+        app:layout_constraintEnd_toStartOf="@id/textViewCategoryAmount"
+        android:layout_marginEnd="8dp"
+        tools:text="Food" />
+
+    <TextView
+        android:id="@+id/textViewCategoryAmount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="$1,250.00" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

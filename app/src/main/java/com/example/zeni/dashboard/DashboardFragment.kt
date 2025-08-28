@@ -17,6 +17,10 @@ import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
 import com.github.mikephil.charting.utils.ColorTemplate
+import com.github.mikephil.charting.listener.OnChartValueSelectedListener
+import com.github.mikephil.charting.data.Entry
+import com.github.mikephil.charting.formatter.PercentFormatter
+import com.github.mikephil.charting.highlight.Highlight
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -27,6 +31,7 @@ class DashboardFragment : Fragment() {
 
     private val viewModel: DashboardViewModel by viewModels()
     private lateinit var transactionAdapter: TransactionAdapter
+    private lateinit var pieLegendAdapter: PieLegendAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -39,7 +44,7 @@ class DashboardFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        setupRecyclerView()
+        setupRecyclerViews()
         setupPieChart()
         observeViewModel()
 
@@ -57,12 +62,15 @@ class DashboardFragment : Fragment() {
         }
     }
 
-    private fun setupRecyclerView() {
-        transactionAdapter = TransactionAdapter { /* Long click is handled in AllTransactionsFragment */ }
+    private fun setupRecyclerViews() {
+        transactionAdapter = TransactionAdapter { /* ... */ }
         binding.recyclerViewTransactions.apply {
             adapter = transactionAdapter
             layoutManager = LinearLayoutManager(requireContext())
         }
+
+        // Setup for the new legend RecyclerView
+        binding.recyclerViewPieLegend.layoutManager = LinearLayoutManager(requireContext())
     }
 
     private fun setupPieChart() {
@@ -70,8 +78,22 @@ class DashboardFragment : Fragment() {
             description.isEnabled = false
             isDrawHoleEnabled = true
             setHoleColor(Color.TRANSPARENT)
-            setEntryLabelColor(Color.BLACK)
+            setDrawEntryLabels(false)
             legend.isEnabled = false
+            setUsePercentValues(true) // Crucial for PercentFormatter
+
+            // Add the click listener
+            setOnChartValueSelectedListener(object : OnChartValueSelectedListener {
+                override fun onValueSelected(e: Entry?, h: Highlight?) {
+                    if (e is PieEntry) {
+                        viewModel.onSliceSelected(e)
+                    }
+                }
+
+                override fun onNothingSelected() {
+                    viewModel.onSliceSelected(null)
+                }
+            })
         }
     }
 
@@ -91,7 +113,6 @@ class DashboardFragment : Fragment() {
             transactionAdapter.submitList(transactions)
         }
 
-        // --- UPDATE OBSERVERS ---
         viewModel.balance.observe(viewLifecycleOwner) { balance ->
             binding.textViewBalanceValue.text = currencyFormat.format(balance)
         }
@@ -104,29 +125,59 @@ class DashboardFragment : Fragment() {
             binding.textViewExpenseValue.text = currencyFormat.format(expense)
         }
 
-        viewModel.expenseByCategory.observe(viewLifecycleOwner) { pieEntries ->
-            updatePieChart(pieEntries)
+        viewModel.pieChartData.observe(viewLifecycleOwner) { (entries, totalExpense) ->
+            updatePieChart(entries, totalExpense)
+        }
+
+        viewModel.selectedSlice.observe(viewLifecycleOwner) { selectedEntry ->
+            if (selectedEntry == null) {
+                // If nothing is selected, show total expense
+                val totalExpense = viewModel.totalExpense.value ?: 0.0
+                binding.pieChart.centerText = "Total Expense\n${currencyFormat.format(totalExpense)}"
+            } else {
+                // If a slice is selected, show its details
+                binding.pieChart.centerText = "${selectedEntry.label}\n${currencyFormat.format(selectedEntry.value)}"
+            }
         }
     }
 
-    private fun updatePieChart(entries: List<PieEntry>) {
+    private fun updatePieChart(entries: List<PieEntry>, totalExpense: Double) {
+        val currencyFormat = NumberFormat.getCurrencyInstance(Locale.US)
+
+        // Set initial center text
+        binding.pieChart.centerText = "Total Expense\n${currencyFormat.format(totalExpense)}"
+        binding.pieChart.setCenterTextSize(18f)
+
         if (entries.isEmpty()) {
-            binding.pieChart.visibility = View.GONE
+            binding.cardViewPieChart.visibility = View.GONE
             return
         }
-        binding.pieChart.visibility = View.VISIBLE
+        binding.cardViewPieChart.visibility = View.VISIBLE
 
-        val dataSet = PieDataSet(entries, "Expenses by Category")
+        val dataSet = PieDataSet(entries, "Expenses")
         dataSet.colors = ColorTemplate.MATERIAL_COLORS.toList()
-        dataSet.valueTextColor = Color.BLACK
-        dataSet.valueTextSize = 12f
 
-        // Set the custom currency formatter
-        dataSet.valueFormatter = CurrencyValueFormatter()
+        // --- NEW STYLING FOR PERCENTAGES ---
+        dataSet.setDrawValues(true) // We want to draw values (percentages)
+        dataSet.valueFormatter = PercentFormatter(binding.pieChart) // Format values as percentages
+        dataSet.valueTextSize = 12f
+        dataSet.valueTextColor = ContextCompat.getColor(requireContext(), R.color.text_primary)
+
+        // Configure lines pointing to the percentage values
+        dataSet.valueLinePart1OffsetPercentage = 100f
+        dataSet.valueLinePart1Length = 0.5f
+        dataSet.valueLinePart2Length = 0.2f
+        dataSet.valueLineColor = ContextCompat.getColor(requireContext(), R.color.text_secondary)
+        dataSet.yValuePosition = PieDataSet.ValuePosition.OUTSIDE_SLICE
 
         val pieData = PieData(dataSet)
         binding.pieChart.data = pieData
-        binding.pieChart.invalidate() // Refresh the chart
+        binding.pieChart.invalidate() // Refresh chart
+
+        // Update custom legend
+        val legendData = dataSet.colors.zip(entries)
+        pieLegendAdapter = PieLegendAdapter(legendData, totalExpense.toFloat())
+        binding.recyclerViewPieLegend.adapter = pieLegendAdapter
     }
 
 
