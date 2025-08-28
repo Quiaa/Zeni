@@ -1,4 +1,3 @@
-// File: app/src/main/java/com/example/zeni/core/data/repository/TransactionRepository.kt
 package com.example.zeni.core.data.repository
 
 import com.example.zeni.core.data.model.Transaction
@@ -33,5 +32,16 @@ class TransactionRepository {
                 snapshot.toObjects()
             }
         }
+    }
+    // Function to delete a transaction document from Firestore
+    suspend fun deleteTransaction(transactionId: String) {
+        // We only need the ID of the document to delete it
+        transactionCollection.document(transactionId).delete().await()
+    }
+
+    // Function to update an existing transaction document in Firestore
+    suspend fun updateTransaction(transaction: Transaction) {
+        // We use the transaction's ID to find the document and set() to overwrite it
+        transactionCollection.document(transaction.id).set(transaction).await()
     }
 }

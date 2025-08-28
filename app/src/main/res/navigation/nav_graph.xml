@@ -102,6 +102,10 @@
         android:id="@+id/allTransactionsFragment"
         android:name="com.example.zeni.transactions.AllTransactionsFragment"
         android:label="fragment_all_transactions"
-        tools:layout="@layout/fragment_all_transactions" />
+        tools:layout="@layout/fragment_all_transactions" >
+        <action
+            android:id="@+id/action_allTransactionsFragment_to_addTransactionFragment"
+            app:destination="@id/addTransactionFragment" />
+    </fragment>
 
 </navigation>

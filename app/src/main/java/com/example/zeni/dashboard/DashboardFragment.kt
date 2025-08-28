@@ -58,7 +58,7 @@ class DashboardFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        transactionAdapter = TransactionAdapter()
+        transactionAdapter = TransactionAdapter { /* Long click is handled in AllTransactionsFragment */ }
         binding.recyclerViewTransactions.apply {
             adapter = transactionAdapter
             layoutManager = LinearLayoutManager(requireContext())

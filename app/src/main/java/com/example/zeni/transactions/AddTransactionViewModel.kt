@@ -19,34 +19,52 @@ class AddTransactionViewModel : ViewModel() {
     private val transactionRepo = TransactionRepository()
     private val authRepo = AuthRepository()
 
-    // LiveData to hold the current save state
     private val _saveState = MutableLiveData<SaveState>(SaveState.IDLE)
     val saveState: LiveData<SaveState> = _saveState
 
-    fun saveTransaction(title: String, amount: Double, type: String, category: String) {
-        // Set state to SAVING to show a loading indicator, for example
-        _saveState.value = SaveState.SAVING
+    // LiveData to hold the transaction being edited. Null if in "Add" mode.
+    private val _editingTransaction = MutableLiveData<Transaction?>(null)
+    val editingTransaction: LiveData<Transaction?> = _editingTransaction
 
-        // Get the current user's ID
+    // Function to set the ViewModel into "Edit Mode"
+    fun loadTransaction(transaction: Transaction) {
+        _editingTransaction.value = transaction
+    }
+
+    // This function now handles both saving a new transaction and updating an existing one
+    fun saveTransaction(title: String, amount: Double, type: String, category: String) {
+        _saveState.value = SaveState.SAVING
         val userId = authRepo.getCurrentUser()?.uid
 
         if (userId == null) {
-            _saveState.value = SaveState.FAILED // Can't save without a user
+            _saveState.value = SaveState.FAILED
             return
         }
 
-        // Create a new Transaction object
-        val transaction = Transaction(
-            userId = userId,
-            title = title,
-            amount = amount,
-            type = type,
-            category = category // We will use a default category for now
-        )
-
         viewModelScope.launch {
             try {
-                transactionRepo.addTransaction(transaction)
+                // Check if we are in "Edit Mode"
+                val transactionToSave = _editingTransaction.value
+                if (transactionToSave != null) {
+                    // Update existing transaction
+                    val updatedTransaction = transactionToSave.copy(
+                        title = title,
+                        amount = amount,
+                        type = type,
+                        category = category
+                    )
+                    transactionRepo.updateTransaction(updatedTransaction)
+                } else {
+                    // Create a new transaction
+                    val newTransaction = Transaction(
+                        userId = userId,
+                        title = title,
+                        amount = amount,
+                        type = type,
+                        category = category
+                    )
+                    transactionRepo.addTransaction(newTransaction)
+                }
                 _saveState.postValue(SaveState.SUCCESS)
             } catch (e: Exception) {
                 _saveState.postValue(SaveState.FAILED)

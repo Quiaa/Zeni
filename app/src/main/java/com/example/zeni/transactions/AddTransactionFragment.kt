@@ -1,5 +1,6 @@
 package com.example.zeni.transactions
 
+import com.example.zeni.core.data.model.Transaction
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -30,8 +31,12 @@ class AddTransactionFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        arguments?.getParcelable<Transaction>("transaction_to_edit")?.let { transaction ->
+            viewModel.loadTransaction(transaction)
+        }
+
         setupClickListeners()
-        observeSaveState()
+        observeViewModel() // Renamed from observeSaveState
     }
 
     private fun setupClickListeners() {
@@ -61,7 +66,7 @@ class AddTransactionFragment : Fragment() {
         }
     }
 
-    private fun observeSaveState() {
+    private fun observeViewModel() {
         viewModel.saveState.observe(viewLifecycleOwner) { state ->
             when (state) {
                 SaveState.SAVING -> {
@@ -80,6 +85,21 @@ class AddTransactionFragment : Fragment() {
                 else -> { // IDLE
                     binding.buttonSave.isEnabled = true
                 }
+            }
+        }
+        // Observe the transaction being edited to pre-fill the form
+        viewModel.editingTransaction.observe(viewLifecycleOwner) { transaction ->
+            transaction?.let {
+                binding.editTextTitle.setText(it.title)
+                binding.editTextAmount.setText(it.amount.toString())
+                if (it.type == "income") {
+                    binding.toggleButtonType.check(R.id.buttonIncome)
+                } else {
+                    binding.toggleButtonType.check(R.id.buttonExpense)
+                }
+                // Update UI elements like the title
+                binding.textViewTitle.text = "Edit Transaction"
+                binding.buttonSave.text = "Update"
             }
         }
     }

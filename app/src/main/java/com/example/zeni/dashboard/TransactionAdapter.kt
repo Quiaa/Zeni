@@ -13,7 +13,9 @@ import java.text.NumberFormat
 import java.util.Locale
 
 // Adapter for the RecyclerView in DashboardFragment. It uses ListAdapter for efficiency.
-class TransactionAdapter : ListAdapter<Transaction, TransactionAdapter.TransactionViewHolder>(TransactionDiffCallback()) {
+class TransactionAdapter(
+    private val onLongClickListener: (Transaction) -> Unit
+) : ListAdapter<Transaction, TransactionAdapter.TransactionViewHolder>(TransactionDiffCallback()) {
 
     // Creates a new ViewHolder instance when the RecyclerView needs one.
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TransactionViewHolder {
@@ -48,6 +50,11 @@ class TransactionAdapter : ListAdapter<Transaction, TransactionAdapter.Transacti
                 binding.textViewTransactionAmount.setTextColor(
                     ContextCompat.getColor(binding.root.context, R.color.red) // You'll need to add this color
                 )
+            }
+            // Set the long click listener for the entire item view
+            itemView.setOnLongClickListener {
+                onLongClickListener(transaction)
+                true // returning true consumes the event
             }
         }
     }

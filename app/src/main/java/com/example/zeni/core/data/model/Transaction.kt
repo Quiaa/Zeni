@@ -1,16 +1,20 @@
 package com.example.zeni.core.data.model
 
+import android.os.Parcelable
+import com.google.firebase.firestore.DocumentId
 import com.google.firebase.firestore.ServerTimestamp
+import kotlinx.parcelize.Parcelize
 import java.util.Date
 
-// This data class represents a single income or expense transaction.
+@Parcelize
 data class Transaction(
-    var id: String = "", // Unique ID for the transaction, will be set by Firestore
-    val userId: String = "", // ID of the user who owns this transaction
+    @DocumentId
+    var id: String = "",
+    val userId: String = "",
     val title: String = "",
     val amount: Double = 0.0,
-    val type: String = "", // "income" or "expense"
+    val type: String = "",
     val category: String = "",
     @ServerTimestamp
-    val timestamp: Date? = null // The date and time of the transaction
-)
+    val timestamp: Date? = null
+) : Parcelable
