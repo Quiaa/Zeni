@@ -2,6 +2,7 @@
 package com.example.zeni.reminders
 
 import android.app.DatePickerDialog
+import android.app.TimePickerDialog
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -42,7 +43,7 @@ class AddReminderFragment : Fragment() {
         observeReminder()
 
         if (args.reminderId == null) {
-            updateDateButtonText() // Set initial date text for new reminders
+            updateDateTimeButtons() // Set initial date text for new reminders
         } else {
             viewModel.loadReminder(args.reminderId!!)
         }
@@ -53,7 +54,7 @@ class AddReminderFragment : Fragment() {
         binding.editTextAmount.setText(reminder.amount.toString())
         reminder.reminderDate?.let {
             calendar.time = it
-            updateDateButtonText()
+            updateDateTimeButtons()
         }
         // You might want to change the title of the fragment/toolbar as well
         // (requireActivity() as AppCompatActivity).supportActionBar?.title = "Edit Reminder"
@@ -68,6 +69,10 @@ class AddReminderFragment : Fragment() {
     private fun setupClickListeners() {
         binding.buttonSelectDate.setOnClickListener {
             showDatePickerDialog()
+        }
+
+        binding.buttonSelectTime.setOnClickListener {
+            showTimePickerDialog()
         }
 
         binding.buttonSaveReminder.setOnClickListener {
@@ -106,7 +111,7 @@ class AddReminderFragment : Fragment() {
             calendar.set(Calendar.YEAR, year)
             calendar.set(Calendar.MONTH, month)
             calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
-            updateDateButtonText()
+            updateDateTimeButtons()
         }
 
         DatePickerDialog(
@@ -118,9 +123,27 @@ class AddReminderFragment : Fragment() {
         ).show()
     }
 
-    private fun updateDateButtonText() {
+    private fun showTimePickerDialog() {
+        val timeSetListener = TimePickerDialog.OnTimeSetListener { _, hourOfDay, minute ->
+            calendar.set(Calendar.HOUR_OF_DAY, hourOfDay)
+            calendar.set(Calendar.MINUTE, minute)
+            updateDateTimeButtons()
+        }
+        TimePickerDialog(
+            requireContext(),
+            timeSetListener,
+            calendar.get(Calendar.HOUR_OF_DAY),
+            calendar.get(Calendar.MINUTE),
+            true // 24-hour view
+        ).show()
+    }
+
+    private fun updateDateTimeButtons() {
         val dateFormat = SimpleDateFormat("MMM d, yyyy", Locale.US)
         binding.buttonSelectDate.text = dateFormat.format(calendar.time)
+
+        val timeFormat = SimpleDateFormat("h:mm a", Locale.US)
+        binding.buttonSelectTime.text = timeFormat.format(calendar.time)
     }
 
     override fun onDestroyView() {

@@ -52,18 +52,36 @@
             android:inputType="numberDecimal" />
     </com.google.android.material.textfield.TextInputLayout>
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/buttonSelectDate"
-        style="?attr/materialButtonOutlinedStyle"
+    <LinearLayout
+        android:id="@+id/linearLayoutDateTime"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="Select Reminder Date"
-        android:textAlignment="viewStart"
-        app:icon="@drawable/ic_calendar"
+        android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textFieldAmountLayout" />
+        app:layout_constraintTop_toBottomOf="@+id/textFieldAmountLayout">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonSelectDate"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="1"
+            android:text="Select Date"
+            app:icon="@drawable/ic_calendar" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonSelectTime"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:text="Select Time"
+            app:icon="@drawable/ic_alarm" />
+    </LinearLayout>
 
     <Button
         android:id="@+id/buttonSaveReminder"
@@ -73,6 +91,6 @@
         android:text="Save Reminder"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/buttonSelectDate" />
+        app:layout_constraintTop_toBottomOf="@+id/linearLayoutDateTime" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

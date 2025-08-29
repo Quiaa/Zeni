@@ -25,14 +25,16 @@
 
         <TextView
             android:id="@+id/textViewReminderDate"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
+            android:layout_marginEnd="8dp"
             android:textAppearance="?attr/textAppearanceBody2"
             android:textColor="?android:attr/textColorSecondary"
+            app:layout_constraintEnd_toStartOf="@+id/textViewReminderAmount"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textViewReminderTitle"
-            tools:text="Next on: Sep 1, 2025" />
+            tools:text="Next on: Sep 1, 2025, 9:00 AM" />
 
         <TextView
             android:id="@+id/textViewReminderAmount"

@@ -35,7 +35,7 @@ class RemindersAdapter(
 
             // Format the date
             reminder.reminderDate?.let {
-                val dateFormat = SimpleDateFormat("MMM d, yyyy", Locale.US)
+                val dateFormat = SimpleDateFormat("MMM d, yyyy, h:mm a", Locale.US)
                 binding.textViewReminderDate.text = "Next on: ${dateFormat.format(it)}"
             }
 
