@@ -6,6 +6,7 @@ plugins {
     // Apply the Google Services plugin here
     alias(libs.plugins.google.services)
     id("kotlin-parcelize")
+    alias(libs.plugins.navigation.safe.args)
 }
 
 android {

@@ -11,7 +11,9 @@ import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.*
 
-class RemindersAdapter : ListAdapter<Reminder, RemindersAdapter.ReminderViewHolder>(ReminderDiffCallback()) {
+class RemindersAdapter(
+    private val onItemClicked: (Reminder) -> Unit
+) : ListAdapter<Reminder, RemindersAdapter.ReminderViewHolder>(ReminderDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ReminderViewHolder {
         val binding = ItemReminderBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -36,6 +38,8 @@ class RemindersAdapter : ListAdapter<Reminder, RemindersAdapter.ReminderViewHold
                 val dateFormat = SimpleDateFormat("MMM d, yyyy", Locale.US)
                 binding.textViewReminderDate.text = "Next on: ${dateFormat.format(it)}"
             }
+
+            itemView.setOnClickListener { onItemClicked(reminder) }
         }
     }
 }

@@ -10,6 +10,8 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
+import com.example.zeni.core.data.model.Reminder
 import com.example.zeni.databinding.FragmentAddReminderBinding
 import com.example.zeni.transactions.SaveState
 import java.text.SimpleDateFormat
@@ -22,6 +24,7 @@ class AddReminderFragment : Fragment() {
 
     private val viewModel: AddReminderViewModel by viewModels()
     private val calendar = Calendar.getInstance()
+    private val args: AddReminderFragmentArgs by navArgs()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -36,7 +39,30 @@ class AddReminderFragment : Fragment() {
 
         setupClickListeners()
         observeSaveState()
-        updateDateButtonText() // Set initial date text
+        observeReminder()
+
+        if (args.reminderId == null) {
+            updateDateButtonText() // Set initial date text for new reminders
+        } else {
+            viewModel.loadReminder(args.reminderId!!)
+        }
+    }
+
+    private fun populateUi(reminder: Reminder) {
+        binding.editTextReminderTitle.setText(reminder.title)
+        binding.editTextAmount.setText(reminder.amount.toString())
+        reminder.reminderDate?.let {
+            calendar.time = it
+            updateDateButtonText()
+        }
+        // You might want to change the title of the fragment/toolbar as well
+        // (requireActivity() as AppCompatActivity).supportActionBar?.title = "Edit Reminder"
+    }
+
+    private fun observeReminder() {
+        viewModel.reminder.observe(viewLifecycleOwner) { reminder ->
+            reminder?.let { populateUi(it) }
+        }
     }
 
     private fun setupClickListeners() {
@@ -54,7 +80,7 @@ class AddReminderFragment : Fragment() {
                 return@setOnClickListener
             }
 
-            viewModel.saveNewReminder(title, amount, calendar.time)
+            viewModel.saveReminder(title, amount, calendar.time, requireContext().applicationContext)
         }
     }
 
